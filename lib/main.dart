@@ -15,6 +15,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Your Pet"; // Default pet name
   int happinessLevel = 50;
   int hungerLevel = 50;
+  int energyLevel = 50; // New state variable for energy level
   final TextEditingController nameController =
       TextEditingController(); // Controller for name input
 
@@ -41,6 +42,10 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _playWithPet() {
     setState(() {
       happinessLevel = (happinessLevel + 10).clamp(0, 100);
+      energyLevel = (energyLevel - 10).clamp(
+        0,
+        100,
+      ); // Decrease energy when playing
       _updateHunger();
     });
   }
@@ -48,6 +53,10 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _feedPet() {
     setState(() {
       hungerLevel = (hungerLevel - 10).clamp(0, 100);
+      energyLevel = (energyLevel + 5).clamp(
+        0,
+        100,
+      ); // Increase energy when feeding
       _updateHappiness();
     });
   }
@@ -135,6 +144,17 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
             Text(
               'Hunger Level: $hungerLevel',
               style: TextStyle(fontSize: 20.0),
+            ),
+            SizedBox(height: 16.0),
+            // Display energy level with progress bar
+            Text(
+              'Energy Level: $energyLevel',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            LinearProgressIndicator(
+              value: energyLevel / 100, // Represents energy as a progress bar
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
             ),
             SizedBox(height: 32.0),
             // Buttons to play and feed the pet
