@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
   runApp(MaterialApp(home: DigitalPetApp()));
@@ -18,6 +19,30 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   int energyLevel = 50; // New state variable for energy level
   final TextEditingController nameController =
       TextEditingController(); // Controller for name input
+  Timer? _hungerTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startHungerTimer();
+  }
+
+  @override
+  void dispose() {
+    _hungerTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startHungerTimer() {
+    _hungerTimer = Timer.periodic(Duration(seconds: 30), (timer) {
+      setState(() {
+        hungerLevel = (hungerLevel + 5).clamp(0, 100);
+        if (hungerLevel == 100) {
+          happinessLevel = (happinessLevel - 20).clamp(0, 100);
+        }
+      });
+    });
+  }
 
   Color get petColor {
     if (happinessLevel > 70) {
@@ -42,10 +67,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _playWithPet() {
     setState(() {
       happinessLevel = (happinessLevel + 10).clamp(0, 100);
-      energyLevel = (energyLevel - 10).clamp(
-        0,
-        100,
-      ); // Decrease energy when playing
+      energyLevel = (energyLevel - 10).clamp(0, 100); // Decrease energy when playing
       _updateHunger();
     });
   }
@@ -53,10 +75,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _feedPet() {
     setState(() {
       hungerLevel = (hungerLevel - 10).clamp(0, 100);
-      energyLevel = (energyLevel + 5).clamp(
-        0,
-        100,
-      ); // Increase energy when feeding
+      energyLevel = (energyLevel + 5).clamp(0, 100); // Increase energy when feeding
       _updateHappiness();
     });
   }
@@ -84,9 +103,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _setPetName() {
     setState(() {
       petName =
-          nameController.text.isNotEmpty
-              ? nameController.text
-              : "Your Pet"; // Set custom name
+          nameController.text.isNotEmpty ? nameController.text : "Your Pet"; // Set custom name
     });
   }
 
@@ -98,7 +115,6 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            // Display pet's image with color based on happiness level
             Container(
               width: 100,
               height: 100,
@@ -108,60 +124,39 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               ),
             ),
             SizedBox(height: 16.0),
-            // Display input for pet name when it’s still default
             if (petName == "Your Pet")
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
                     TextField(
-                      controller: nameController, // Controller for text input
+                      controller: nameController,
                       decoration: InputDecoration(labelText: 'Enter Pet Name'),
                     ),
                     ElevatedButton(
-                      onPressed: _setPetName, // Confirm name button
+                      onPressed: _setPetName,
                       child: Text('Confirm Name'),
                     ),
                   ],
                 ),
               ),
-            // Display pet's name if it's set
             if (petName != "Your Pet")
               Text('Name: $petName', style: TextStyle(fontSize: 20.0)),
             SizedBox(height: 16.0),
-            // Display mood indicator
-            Text(
-              'Mood: $petMood', // Show the mood with emoji
-              style: TextStyle(fontSize: 20.0),
-            ),
+            Text('Mood: $petMood', style: TextStyle(fontSize: 20.0)),
             SizedBox(height: 16.0),
-            // Display happiness and hunger levels
-            Text(
-              'Happiness Level: $happinessLevel',
-              style: TextStyle(fontSize: 20.0),
-            ),
+            Text('Happiness Level: $happinessLevel', style: TextStyle(fontSize: 20.0)),
             SizedBox(height: 16.0),
-            Text(
-              'Hunger Level: $hungerLevel',
-              style: TextStyle(fontSize: 20.0),
-            ),
+            Text('Hunger Level: $hungerLevel', style: TextStyle(fontSize: 20.0)),
             SizedBox(height: 16.0),
-            // Display energy level with progress bar
-            Text(
-              'Energy Level: $energyLevel',
-              style: TextStyle(fontSize: 20.0),
-            ),
+            Text('Energy Level: $energyLevel', style: TextStyle(fontSize: 20.0)),
             LinearProgressIndicator(
-              value: energyLevel / 100, // Represents energy as a progress bar
+              value: energyLevel / 100,
               backgroundColor: Colors.grey[300],
               valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
             ),
             SizedBox(height: 32.0),
-            // Buttons to play and feed the pet
-            ElevatedButton(
-              onPressed: _playWithPet,
-              child: Text('Play with Your Pet'),
-            ),
+            ElevatedButton(onPressed: _playWithPet, child: Text('Play with Your Pet')),
             SizedBox(height: 16.0),
             ElevatedButton(onPressed: _feedPet, child: Text('Feed Your Pet')),
           ],
